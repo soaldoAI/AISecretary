@@ -10,6 +10,7 @@ export default function Home() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [activeColumn, setActiveColumn] = useState<TaskStatus>("todo");
 
   const fetchTasks = useCallback(async () => {
     const res = await fetch("/api/tasks");
@@ -53,16 +54,17 @@ export default function Home() {
     });
     await fetchTasks();
     setEditingTask(null);
+    setModalOpen(false);
   };
 
   const handleDeleteTask = async (id: number) => {
     await fetch(`/api/tasks/${id}`, { method: "DELETE" });
     await fetchTasks();
     setEditingTask(null);
+    setModalOpen(false);
   };
 
   const handleMoveTask = async (taskId: number, newStatus: TaskStatus, newPosition: number) => {
-    // Optimistic update
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, status: newStatus, position: newPosition } : t))
     );
@@ -74,28 +76,63 @@ export default function Home() {
     await fetchTasks();
   };
 
+  const taskCounts = COLUMNS.reduce((acc, col) => {
+    acc[col.id] = tasks.filter((t) => t.status === col.id).length;
+    return acc;
+  }, {} as Record<TaskStatus, number>);
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">AerialIQ Kanban</h1>
-          <p className="text-sm text-gray-400 mt-1">Agent-Driven Task Management</p>
+    <div className="h-dvh flex flex-col bg-gray-950 text-white overflow-hidden">
+      {/* Header */}
+      <header className="shrink-0 border-b border-gray-800/60 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight">AerialIQ</h1>
+            <p className="text-[11px] sm:text-sm text-gray-500">Agent-Driven Tasks</p>
+          </div>
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setModalOpen(true);
+            }}
+            className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+          >
+            + New Task
+          </button>
         </div>
-        <button
-          onClick={() => {
-            setEditingTask(null);
-            setModalOpen(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + New Task
-        </button>
       </header>
 
-      <main className="p-6">
+      {/* Column Tabs (mobile) / Column Headers (desktop) */}
+      <nav className="shrink-0 border-b border-gray-800/40 sm:hidden">
+        <div className="flex hide-scrollbar overflow-x-auto">
+          {COLUMNS.map((col) => (
+            <button
+              key={col.id}
+              onClick={() => setActiveColumn(col.id)}
+              className={`flex-1 min-w-0 px-1 py-2.5 text-center text-xs font-medium transition-colors relative
+                ${activeColumn === col.id ? "text-white" : "text-gray-500"}`}
+            >
+              <span className="block truncate">{col.label}</span>
+              {taskCounts[col.id] > 0 && (
+                <span className={`inline-block mt-0.5 text-[10px] min-w-[18px] px-1 py-px rounded-full
+                  ${activeColumn === col.id ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"}`}>
+                  {taskCounts[col.id]}
+                </span>
+              )}
+              {activeColumn === col.id && (
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-blue-500 rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Board */}
+      <main className="flex-1 overflow-hidden">
         <KanbanBoard
           tasks={tasks}
           columns={COLUMNS}
+          activeColumn={activeColumn}
           onMoveTask={handleMoveTask}
           onEditTask={(task) => {
             setEditingTask(task);
@@ -104,10 +141,23 @@ export default function Home() {
         />
       </main>
 
+      {/* Mobile FAB */}
+      <button
+        onClick={() => {
+          setEditingTask(null);
+          setModalOpen(true);
+        }}
+        className="sm:hidden fixed bottom-6 right-4 w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center text-2xl font-light transition-transform active:scale-95 z-40 safe-bottom"
+      >
+        +
+      </button>
+
+      {/* Modal */}
       {modalOpen && (
         <TaskModal
           task={editingTask}
           agents={agents}
+          activeColumn={activeColumn}
           onSave={
             editingTask
               ? (updates) => handleUpdateTask(editingTask.id, updates)

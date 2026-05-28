@@ -24,10 +24,10 @@ export interface Task {
   agent?: Agent;
 }
 
-export const COLUMNS: { id: TaskStatus; label: string }[] = [
-  { id: "backlog", label: "Backlog" },
-  { id: "todo", label: "To Do" },
-  { id: "in_progress", label: "In Progress" },
-  { id: "review", label: "Review" },
-  { id: "done", label: "Done" },
+export const COLUMNS: { id: TaskStatus; label: string; icon: string }[] = [
+  { id: "backlog", label: "Backlog", icon: "inbox" },
+  { id: "todo", label: "To Do", icon: "list" },
+  { id: "in_progress", label: "Active", icon: "zap" },
+  { id: "review", label: "Review", icon: "eye" },
+  { id: "done", label: "Done", icon: "check" },
 ];
