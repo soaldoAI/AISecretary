@@ -1,4 +1,4 @@
-const CACHE_NAME = "aerialiq-kanban-v1";
+const CACHE_NAME = "launchdesk-v1";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

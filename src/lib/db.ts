@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import path from "path";
+import { runMigrations } from "./migrate";
 
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), "kanban.db");
 
@@ -10,39 +11,18 @@ function getDb(): Database.Database {
     db = new Database(DB_PATH);
     db.pragma("journal_mode = WAL");
     db.pragma("foreign_keys = ON");
-    initSchema(db);
+    // Schema is owned by the versioned migration runner (migrations/*.sql).
+    // It runs before seeding so the agents table is guaranteed to exist.
+    runMigrations(db);
+    seedDefaultAgents(db);
   }
   return db;
 }
 
-function initSchema(db: Database.Database) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS agents (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
-      role TEXT NOT NULL,
-      avatar TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS tasks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT DEFAULT '',
-      status TEXT NOT NULL DEFAULT 'backlog',
-      priority TEXT NOT NULL DEFAULT 'medium',
-      assigned_to INTEGER REFERENCES agents(id),
-      due_date TEXT,
-      position INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-    CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to);
-  `);
-
-  // Seed default agents if empty
+// Default agents are DATA, not schema, so they live here (run after migrations)
+// rather than inside a migration file. Only seeds when the table is empty, so
+// existing live databases are left untouched.
+function seedDefaultAgents(db: Database.Database) {
   const count = db.prepare("SELECT COUNT(*) as c FROM agents").get() as { c: number };
   if (count.c === 0) {
     const insert = db.prepare("INSERT INTO agents (name, role, avatar) VALUES (?, ?, ?)");

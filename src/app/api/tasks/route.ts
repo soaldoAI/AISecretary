@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import getDb from "@/lib/db";
+import { logActivity } from "@/lib/activity";
 
 export async function GET() {
   const db = getDb();
@@ -50,13 +51,16 @@ export async function POST(req: NextRequest) {
       maxPos.next
     );
 
+  const taskId = result.lastInsertRowid as number;
+  logActivity(taskId, "Sohan", "created", `Created task in ${status || "backlog"}`);
+
   const task = db
     .prepare(
       `SELECT t.*, a.name as agent_name, a.role as agent_role, a.avatar as agent_avatar
        FROM tasks t LEFT JOIN agents a ON t.assigned_to = a.id
        WHERE t.id = ?`
     )
-    .get(result.lastInsertRowid);
+    .get(taskId);
 
   return NextResponse.json(task, { status: 201 });
 }

@@ -1,6 +1,6 @@
 export type TaskStatus = "backlog" | "todo" | "in_progress" | "review" | "done";
 
-export type Priority = "low" | "medium" | "high" | "urgent";
+export type Priority = "low" | "medium" | "high";
 
 export interface Agent {
   id: number;

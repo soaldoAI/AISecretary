@@ -23,13 +23,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AerialIQ Kanban",
+  title: "Launchdesk",
   description: "Agent-Driven Task Management",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "AerialIQ",
+    title: "Launchdesk",
   },
 };
 

@@ -1,6 +1,6 @@
 {
-  "name": "AerialIQ Kanban",
-  "short_name": "Kanban",
+  "name": "Launchdesk",
+  "short_name": "Launchdesk",
   "description": "Agent-Driven Task Management",
   "start_url": "/",
   "display": "standalone",
