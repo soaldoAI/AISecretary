@@ -1,37 +1,51 @@
 #!/bin/bash
 set -e
 
-# AISecretary Installer
+# AISecretary Installer (Linux / macOS)
 # Usage: curl -fsSL https://raw.githubusercontent.com/soaldoAI/AISecretary/main/install.sh | bash
 
 REPO="https://github.com/soaldoAI/AISecretary.git"
 INSTALL_DIR="$HOME/AISecretary"
-PORT=3001
 
 echo ""
 echo "  ╔══════════════════════════════════════╗"
-echo "  ║         AISECRETARY INSTALLER         ║"
+echo "  ║       AISECRETARY INSTALLER          ║"
 echo "  ║  Your self-hosted AI workspace       ║"
 echo "  ╚══════════════════════════════════════╝"
 echo ""
 
+# --- Detect OS ---
+OS="$(uname -s)"
+case "$OS" in
+  Linux*)   PLATFORM=linux ;;
+  Darwin*)  PLATFORM=mac ;;
+  *)        echo "❌ Unsupported OS: $OS"; echo "   Use install.ps1 for Windows."; exit 1 ;;
+esac
+echo "🖥️  Detected platform: $PLATFORM"
+echo ""
+
 # --- Check prerequisites ---
+MISSING=0
+
 check_command() {
   if ! command -v "$1" &>/dev/null; then
     echo "❌ $1 is not installed."
     return 1
   fi
-  echo "✅ $1 found: $(command -v "$1")"
+  echo "✅ $1 found"
   return 0
 }
 
 echo "Checking prerequisites..."
 echo ""
 
-MISSING=0
-
 if ! check_command node; then
-  echo "   Install Node.js: https://nodejs.org (v18+ required)"
+  if [ "$PLATFORM" = "mac" ]; then
+    echo "   Install Node.js: brew install node"
+  else
+    echo "   Install Node.js: https://nodejs.org (v18+ required)"
+    echo "   Or: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt install -y nodejs"
+  fi
   MISSING=1
 fi
 
@@ -41,13 +55,12 @@ if ! check_command npm; then
 fi
 
 if ! check_command git; then
-  echo "   Install git: sudo apt install -y git"
+  if [ "$PLATFORM" = "mac" ]; then
+    echo "   Install git: xcode-select --install"
+  else
+    echo "   Install git: sudo apt install -y git"
+  fi
   MISSING=1
-fi
-
-if ! check_command sqlite3; then
-  echo "   ⚠️  sqlite3 not found (optional, needed for Telegram briefs)"
-  echo "   Install: sudo apt install -y sqlite3"
 fi
 
 echo ""
@@ -58,7 +71,7 @@ if [ "$MISSING" -eq 1 ]; then
 fi
 
 # Check Node version
-NODE_MAJOR=$(node -v | cut -d'.' -f1 | tr -d 'v')
+NODE_MAJOR=$(node -v | cut -d. -f1 | tr -d v)
 if [ "$NODE_MAJOR" -lt 18 ]; then
   echo "❌ Node.js v18+ required. You have $(node -v)."
   exit 1
@@ -68,7 +81,7 @@ echo ""
 
 # --- Clone or update ---
 if [ -d "$INSTALL_DIR" ]; then
-  echo "📁 AISecretary directory already exists at $INSTALL_DIR"
+  echo "📁 AISecretary already exists at $INSTALL_DIR"
   read -p "   Update to latest version? [Y/n] " UPDATE
   UPDATE=${UPDATE:-Y}
   if [[ "$UPDATE" =~ ^[Yy]$ ]]; then
@@ -87,7 +100,7 @@ cd "$INSTALL_DIR"
 # --- Install dependencies ---
 echo ""
 echo "📦 Installing dependencies..."
-npm install --production=false 2>&1 | tail -3
+npm install 2>&1 | tail -3
 echo "✅ Dependencies installed"
 
 # --- Environment setup ---
@@ -97,37 +110,57 @@ if [ ! -f .env.local ]; then
   echo "📝 Created .env.local from template"
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "  Let's configure your workspace"
+  echo "  Configure your AI Co-Pilot"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-
-  # OpenAI key
-  echo "🤖 AI Co-Pilot Setup"
-  echo "   Get an API key from: https://platform.openai.com/api-keys"
-  read -p "   OpenAI API key (or press Enter to skip): " OPENAI_KEY
-  if [ -n "$OPENAI_KEY" ]; then
-    sed -i "s|sk-your-openai-key-here|$OPENAI_KEY|" .env.local
-    echo "   ✅ API key saved"
-  else
-    echo "   ⏭️  Skipped — you can add it later in .env.local"
-  fi
+  echo "  Pick a provider:"
+  echo "    1) OpenRouter (recommended — many models)"
+  echo "    2) OpenAI (direct)"
+  echo "    3) Ollama (local, free, no key needed)"
+  echo "    4) Skip for now"
   echo ""
+  read -p "  Choice [1-4]: " PROVIDER_CHOICE
+  PROVIDER_CHOICE=${PROVIDER_CHOICE:-4}
 
-  # Telegram
-  echo "📱 Telegram Daily Brief (optional)"
-  echo "   Create a bot: message @BotFather on Telegram"
-  echo "   Get your chat ID: message @userinfobot on Telegram"
-  read -p "   Telegram bot token (or press Enter to skip): " TG_TOKEN
-  if [ -n "$TG_TOKEN" ]; then
-    sed -i "s|your-telegram-bot-token|$TG_TOKEN|" .env.local
-    read -p "   Your Telegram chat ID: " TG_CHAT
-    if [ -n "$TG_CHAT" ]; then
-      sed -i "s|your-telegram-user-id|$TG_CHAT|" .env.local
-      echo "   ✅ Telegram configured"
-    fi
-  else
-    echo "   ⏭️  Skipped — you can add it later in .env.local"
-  fi
+  case "$PROVIDER_CHOICE" in
+    1)
+      echo ""
+      echo "  Get an API key at: https://openrouter.ai/keys"
+      read -p "  OpenRouter API key: " API_KEY
+      if [ -n "$API_KEY" ]; then
+        sed -i.bak "s|your-api-key-here|$API_KEY|" .env.local
+        rm -f .env.local.bak
+        echo "  ✅ OpenRouter configured"
+      fi
+      ;;
+    2)
+      echo ""
+      echo "  Get an API key at: https://platform.openai.com/api-keys"
+      read -p "  OpenAI API key: " API_KEY
+      if [ -n "$API_KEY" ]; then
+        sed -i.bak "s|OPENROUTER_BASE_URL=https://openrouter.ai/api/v1|OPENROUTER_BASE_URL=https://api.openai.com/v1|" .env.local
+        sed -i.bak "s|your-api-key-here|$API_KEY|" .env.local
+        rm -f .env.local.bak
+        echo "  ✅ OpenAI configured"
+      fi
+      ;;
+    3)
+      echo ""
+      if command -v ollama &>/dev/null; then
+        echo "  ✅ Ollama found"
+      else
+        echo "  ⚠️  Ollama not installed. Get it at: https://ollama.com"
+        echo "  After installing, run: ollama pull llama3.2:3b"
+      fi
+      sed -i.bak "s|COPILOT_DEFAULT_PROVIDER=openrouter|COPILOT_DEFAULT_PROVIDER=ollama|" .env.local
+      sed -i.bak "s|COPILOT_DEFAULT_MODEL=gpt-4o-mini|COPILOT_DEFAULT_MODEL=llama3.2:3b|" .env.local
+      rm -f .env.local.bak
+      echo "  ✅ Ollama configured"
+      ;;
+    *)
+      echo "  ⏭️  Skipped — edit ~/AISecretary/.env.local later"
+      ;;
+  esac
   echo ""
 else
   echo "✅ .env.local already exists — keeping your config"
@@ -139,27 +172,18 @@ echo "🔨 Building AISecretary..."
 npm run build 2>&1 | tail -5
 echo "✅ Build complete"
 
-# --- Start ---
+# --- Done ---
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  🚀 AISecretary is ready!"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "  Start it now:"
-echo "    cd $INSTALL_DIR && npm start"
+echo "  ✅ AISecretary is ready!"
 echo ""
-echo "  Then open: http://localhost:$PORT"
+echo "  Start it:"
+echo "    cd ~/AISecretary && npm start"
 echo ""
-echo "  Optional next steps:"
-echo "    • Edit ~/AISecretary/.env.local to add API keys"
-echo "    • Set up Google Calendar (see README.md)"
-echo "    • Set up daily Telegram briefs:"
-echo "        chmod +x daily-tasks-notify.sh"
-echo "        ./daily-tasks-notify.sh  # test it"
-echo "        (crontab -l; echo \"0 8 * * * $INSTALL_DIR/daily-tasks-notify.sh\") | crontab -"
+echo "  Then open: http://localhost:3000"
 echo ""
-echo "  Run as a background service (Linux):"
-echo "    See README.md → Production Deployment"
+echo "  Your Kanban board is waiting."
 echo ""
-echo "  Happy building! 🛠️"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

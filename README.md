@@ -2,7 +2,7 @@
 
 A self-hosted AI-powered workspace for solo founders. Kanban board, AI Co-Pilot, Google Calendar, and daily Telegram briefs — all running on a single machine.
 
-Built to run on a mini PC (Intel NUC), Raspberry Pi, or any Linux box you have lying around.
+Works on **Linux**, **macOS**, and **Windows**. Built to run on anything — a mini PC, a laptop, a Raspberry Pi, or a cloud VM.
 
 ![AISecretary](https://img.shields.io/badge/status-active-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -15,15 +15,52 @@ Built to run on a mini PC (Intel NUC), Raspberry Pi, or any Linux box you have l
 - **PWA** — Installable on mobile, works offline
 - **SQLite** — Zero-config database, single file, easy to back up
 
-## Quick Start
+## One-Line Install
+
+The installer checks prerequisites, clones the repo, installs dependencies, walks you through config, builds the app, and gets you to your Kanban board.
+
+**Linux / macOS:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/soaldoAI/AISecretary/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/soaldoAI/AISecretary/main/install.ps1 | iex
+```
+
+After install, start it and open your board:
+
+```bash
+cd ~/AISecretary && npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) — your Kanban board is ready.
+
+## Manual Install
+
+If you prefer to set things up yourself:
+
+### Prerequisites
+
+| Requirement | Linux | macOS | Windows |
+|------------|-------|-------|---------|
+| Node.js 18+ | `sudo apt install nodejs` or [nodejs.org](https://nodejs.org) | `brew install node` | `winget install OpenJS.NodeJS.LTS` |
+| npm | Comes with Node.js | Comes with Node.js | Comes with Node.js |
+| Git | `sudo apt install git` | `xcode-select --install` | `winget install Git.Git` |
+
+### Steps
 
 ```bash
 git clone https://github.com/soaldoAI/AISecretary.git
 cd AISecretary
 npm install
 cp .env.example .env.local
-# Edit .env.local with your API keys
-npm run dev
+# Edit .env.local — pick your AI provider (see below)
+npm run build
+npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -41,40 +78,44 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Configuration
 
-Copy `.env.example` to `.env.local` and fill in your keys:
+Copy `.env.example` to `.env.local` and pick your AI provider:
 
-### Co-Pilot (required for AI chat)
-Get an API key from [OpenAI](https://platform.openai.com/api-keys) or [OpenRouter](https://openrouter.ai/).
+### AI Co-Pilot (pick one)
+
+| Provider | Cost | Setup |
+|----------|------|-------|
+| [OpenRouter](https://openrouter.ai/) | Pay per use | Get a key at [openrouter.ai/keys](https://openrouter.ai/keys) |
+| [OpenAI](https://platform.openai.com/api-keys) | Pay per use | Get a key at [platform.openai.com](https://platform.openai.com/api-keys) |
+| [Ollama](https://ollama.com) | Free (local) | Install Ollama, then `ollama pull llama3.2:3b` |
+
+See `.env.example` for the exact variables to set for each provider.
 
 ### Google Calendar (optional)
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Enable the Google Calendar API
 3. Create OAuth 2.0 credentials (Web application)
-4. Set redirect URI to `http://localhost:3001/api/calendar/callback`
+4. Set redirect URI to `http://localhost:3000/api/calendar/callback`
 5. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to `.env.local`
 
-### Telegram Daily Brief (optional)
+### Telegram Daily Brief (optional, Linux/macOS)
 1. Message [@BotFather](https://t.me/BotFather) on Telegram to create a bot
 2. Get your chat ID from [@userinfobot](https://t.me/userinfobot)
 3. Add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to `.env.local`
 4. Set up the cron job:
 ```bash
 chmod +x daily-tasks-notify.sh
-# Test it
-./daily-tasks-notify.sh
-# Schedule for 8am daily
+./daily-tasks-notify.sh  # test it
 (crontab -l 2>/dev/null; echo "0 8 * * * $(pwd)/daily-tasks-notify.sh") | crontab -
 ```
 
-## Production Deployment
+## Production Deployment (Linux)
 
-Build and run with systemd:
+For always-on servers (NUC, Raspberry Pi, VPS), run as a systemd service:
 
 ```bash
 npm run build
 
-# Create systemd service
-sudo tee /etc/systemd/system/aisecretary.service << 'SERVICE'
+sudo tee /etc/systemd/system/aisecretary.service << SERVICE
 [Unit]
 Description=AISecretary
 After=network-online.target
@@ -86,7 +127,6 @@ User=YOUR_USERNAME
 WorkingDirectory=/home/YOUR_USERNAME/AISecretary
 ExecStart=/usr/bin/npm start
 Environment=NODE_ENV=production
-Environment=PORT=3001
 Restart=on-failure
 RestartSec=10
 
@@ -103,7 +143,7 @@ sudo systemctl start aisecretary
 
 ```bash
 sudo apt install -y caddy
-echo 'your-hostname.example.com { reverse_proxy localhost:3001 }' | sudo tee /etc/caddy/Caddyfile
+echo your-hostname.example.com { reverse_proxy localhost:3000 } | sudo tee /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 ```
 
@@ -111,6 +151,8 @@ sudo systemctl restart caddy
 
 ```
 AISecretary/
+├── install.sh            # Linux/macOS installer
+├── install.ps1           # Windows installer
 ├── migrations/           # SQL migration files
 ├── src/
 │   ├── app/
