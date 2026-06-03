@@ -58,7 +58,7 @@ export async function* streamChatWithTools(
     return;
   }
 
-  let currentMessages = [...messages];
+  const currentMessages = [...messages];
   let toolRound = 0;
 
   while (toolRound < maxToolRounds) {
