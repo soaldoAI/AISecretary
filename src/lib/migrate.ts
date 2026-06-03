@@ -3,7 +3,7 @@ import path from "path";
 import type Database from "better-sqlite3";
 
 /**
- * Minimal forward-only migration runner for Launchdesk.
+ * Minimal forward-only migration runner for AISecretary.
  *
  * See docs/architecture/ADR-0001-migration-strategy.md for the full rationale.
  *
@@ -23,7 +23,7 @@ const MIGRATIONS_DIRNAME = "migrations";
  *
  * We rely on `process.cwd()` (with a `MIGRATIONS_DIR` env override). This mirrors
  * how src/lib/db.ts already resolves the SQLite file (`process.cwd()/kanban.db`),
- * so the two are always consistent. Launchdesk is a self-hosted, long-running
+ * so the two are always consistent. AISecretary is a self-hosted, long-running
  * `next start` process on a single NUC, so cwd is the project root in both dev
  * and production. The SQL files are read from disk at runtime (not bundled), so
  * they only need to physically exist relative to cwd, which they do.

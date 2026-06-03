@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         calendarId: "primary",
         requestBody: {
           summary: `Meeting with ${guestName}`,
-          description: `Booked via Launchdesk\n\nGuest: ${guestName}\nEmail: ${guestEmail}${notes ? "\nNotes: " + notes : ""}`,
+          description: `Booked via AISecretary\n\nGuest: ${guestName}\nEmail: ${guestEmail}${notes ? "\nNotes: " + notes : ""}`,
           start: { dateTime: startTime, timeZone: settings.timezone },
           end: { dateTime: endTime, timeZone: settings.timezone },
           attendees: [{ email: guestEmail }],

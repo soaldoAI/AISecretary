@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Launchdesk's schema was, until now, created by inline `CREATE TABLE IF NOT EXISTS`
+AISecretary's schema was, until now, created by inline `CREATE TABLE IF NOT EXISTS`
 statements in `src/lib/db.ts` (`initSchema`). That was fine for the first two
 tables (`agents`, `tasks`), but it breaks down as soon as the schema needs to
 *change* rather than just *exist*:
@@ -26,7 +26,7 @@ tables (`agents`, `tasks`), but it breaks down as soon as the schema needs to
   way to know whether a given change was applied, applied twice, or skipped.
 
 We need a way to evolve the schema over time, in order, with a durable record
-of what has been applied — without violating Launchdesk's core constraints
+of what has been applied — without violating AISecretary's core constraints
 (SQLite only, keep it simple, one user, no heavy dependencies).
 
 ## Decision
@@ -101,14 +101,14 @@ The runner resolves the folder as `process.cwd()/migrations`, with a
 resolves the SQLite file (`process.cwd()/kanban.db` with a `DB_PATH` override),
 so the database and its migrations are always located consistently.
 
-This is sound for Launchdesk because it is a self-hosted, long-running
+This is sound for AISecretary because it is a self-hosted, long-running
 `next start` process whose working directory is the project root in both `next
 dev` and `next start`. The SQL files are read from disk **at runtime** via `fs`
 (they are not imported/bundled), so they only need to physically exist relative
 to the working directory — which they do. We explicitly chose runtime `fs`
 reads of raw `.sql` files (over, say, inlining SQL as bundled string modules)
 to keep migrations as plain, reviewable SQL. The `MIGRATIONS_DIR` override is
-the escape hatch if Launchdesk is ever launched from a non-root cwd.
+the escape hatch if AISecretary is ever launched from a non-root cwd.
 
 ### Adding a migration going forward
 
@@ -164,4 +164,4 @@ TypeScript over the `better-sqlite3` connection we already have.
 - **Migrations run on the request path.** They execute during the first
   `getDb()` of the process. Migrations should stay fast; long-running data
   backfills should be considered carefully (they would delay the first request
-  after a deploy). At Launchdesk's scale this is a non-issue.
+  after a deploy). At AISecretary's scale this is a non-issue.

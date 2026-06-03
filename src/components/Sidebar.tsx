@@ -43,7 +43,7 @@ export default function Sidebar() {
       >
         <div className={"px-3 py-4 border-b border-gray-800/40 " + (collapsed ? "text-center" : "")}>
           <span className="text-lg font-bold">
-            {collapsed ? "L" : "Launchdesk"}
+            {collapsed ? "A" : "AISecretary"}
           </span>
         </div>
         <nav className="flex-1 py-2 space-y-1">

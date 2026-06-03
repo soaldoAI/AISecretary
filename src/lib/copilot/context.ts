@@ -85,7 +85,7 @@ ${statusLine} | overdue:${overdueCount.count} | ${priorityLine}
 ## ACTIVE TASKS (id | status | priority | due | assignee | title)
 ${taskRows || "No active tasks."}`;
 
-  const systemPrompt = `You are the Co-Pilot inside Launchdesk, a private AI office for a solo founder.
+  const systemPrompt = `You are the Co-Pilot inside AISecretary, a private AI office for a solo founder.
 Today is ${today}.
 
 Be concise and action-oriented. When asked about tasks, priorities, or the board, use ONLY the data below.

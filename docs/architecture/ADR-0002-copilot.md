@@ -6,7 +6,7 @@ Proposed
 
 ## Context
 
-Launchdesk is a private, self-hosted "AI office" for a **single** founder, running on
+AISecretary is a private, self-hosted "AI office" for a **single** founder, running on
 an Intel NUC7i7BNH (i7-7567U, 16 GB RAM, **no GPU**, Ubuntu) reached over Tailscale.
 The roadmap calls for a **Co-Pilot chat**: a conversational assistant grounded in the
 founder's own data that can answer questions like *"What's overdue?"*, *"What should I
@@ -300,7 +300,7 @@ existing logic in `src/app/api/tasks/*`. Guardrails when added:
 
 System prompt (assembled per request, server-side) contains:
 
-1. **Identity & founder context**: "You are the Co-Pilot inside Launchdesk, a private AI
+1. **Identity & founder context**: "You are the Co-Pilot inside AISecretary, a private AI
    office for a solo founder. Be concise and action-oriented." Today's date (for
    overdue/`due_date` reasoning).
 2. **Agent roster**: the 10 seeded agents as `name (role)` so the model can attribute work

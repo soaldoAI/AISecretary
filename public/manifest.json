@@ -1,6 +1,6 @@
 {
-  "name": "Launchdesk",
-  "short_name": "Launchdesk",
+  "name": "AISecretary",
+  "short_name": "AISecretary",
   "description": "Agent-Driven Task Management",
   "start_url": "/",
   "display": "standalone",

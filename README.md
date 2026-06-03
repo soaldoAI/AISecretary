@@ -1,10 +1,10 @@
-# Launchdesk
+# AISecretary
 
 A self-hosted AI-powered workspace for solo founders. Kanban board, AI Co-Pilot, Google Calendar, and daily Telegram briefs — all running on a single machine.
 
 Built to run on a mini PC (Intel NUC), Raspberry Pi, or any Linux box you have lying around.
 
-![Launchdesk](https://img.shields.io/badge/status-active-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
+![AISecretary](https://img.shields.io/badge/status-active-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Features
 
@@ -18,8 +18,8 @@ Built to run on a mini PC (Intel NUC), Raspberry Pi, or any Linux box you have l
 ## Quick Start
 
 ```bash
-git clone https://github.com/soaldoAI/launchdesk.git
-cd launchdesk
+git clone https://github.com/soaldoAI/AISecretary.git
+cd AISecretary
 npm install
 cp .env.example .env.local
 # Edit .env.local with your API keys
@@ -74,16 +74,16 @@ Build and run with systemd:
 npm run build
 
 # Create systemd service
-sudo tee /etc/systemd/system/launchdesk.service << 'SERVICE'
+sudo tee /etc/systemd/system/aisecretary.service << 'SERVICE'
 [Unit]
-Description=Launchdesk
+Description=AISecretary
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
 User=YOUR_USERNAME
-WorkingDirectory=/home/YOUR_USERNAME/launchdesk
+WorkingDirectory=/home/YOUR_USERNAME/AISecretary
 ExecStart=/usr/bin/npm start
 Environment=NODE_ENV=production
 Environment=PORT=3001
@@ -95,8 +95,8 @@ WantedBy=multi-user.target
 SERVICE
 
 sudo systemctl daemon-reload
-sudo systemctl enable launchdesk
-sudo systemctl start launchdesk
+sudo systemctl enable aisecretary
+sudo systemctl start aisecretary
 ```
 
 ### HTTPS with Caddy (optional)
@@ -110,7 +110,7 @@ sudo systemctl restart caddy
 ## Project Structure
 
 ```
-launchdesk/
+AISecretary/
 ├── migrations/           # SQL migration files
 ├── src/
 │   ├── app/

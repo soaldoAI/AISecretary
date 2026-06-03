@@ -23,13 +23,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Launchdesk",
+  title: "AISecretary",
   description: "Agent-Driven Task Management",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Launchdesk",
+    title: "AISecretary",
   },
 };
 
