@@ -4,7 +4,7 @@ A self-hosted AI-powered workspace for solo founders. Kanban board, AI Co-Pilot,
 
 Works on **Linux**, **macOS**, and **Windows**. Built to run on anything — a mini PC, a laptop, a Raspberry Pi, or a cloud VM.
 
-![AISecretary](https://img.shields.io/badge/status-active-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
+![AISecretary](https://img.shields.io/badge/status-active-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
 ## Features
 
@@ -105,8 +105,33 @@ See `.env.example` for the exact variables to set for each provider.
 ```bash
 chmod +x daily-tasks-notify.sh
 ./daily-tasks-notify.sh  # test it
-(crontab -l 2>/dev/null; echo "0 8 * * * $(pwd)/daily-tasks-notify.sh") | crontab -
+(crontab -l 2>/dev/null; echo "0 8 * * * /full/path/to/daily-tasks-notify.sh") | crontab -
 ```
+
+## Contributing — We Want You
+
+AISecretary is more than a Kanban board. We're building an **open-source agentic AI platform** — a workspace where AI agents don't just chat, they *do work*. They read the board. They take action. They report back. And it all runs on your own hardware.
+
+**We're looking for developers who want to build the future of local-first AI agents.**
+
+### What you can build
+
+| Area | Examples | Difficulty |
+|------|----------|------------|
+| **New Co-Pilot Tools** | Search tasks, bulk operations, task analytics, time tracking | Easy |
+| **Integrations** | Slack, GitHub Issues, Notion, Linear, Email (IMAP/SMTP), webhooks | Medium |
+| **Agent Plugins** | Agents that draft emails, generate invoices, post to social media, scrape the web | Medium |
+| **Agent Orchestration** | Agents that delegate to each other, chain tasks, run on schedules | Hard |
+| **RAG Pipeline** | Query your business docs, emails, and notes from the Co-Pilot | Hard |
+| **Infrastructure** | Docker support, multi-user auth, mobile app, backup/restore | Medium-Hard |
+
+### Getting started
+
+1. Read the **[Contributing Guide](CONTRIBUTING.md)** — architecture overview, how to add tools, how to add integrations
+2. Browse the [open issues](https://github.com/soaldoAI/AISecretary/issues) — look for `good first issue` labels
+3. Fork the repo, build something, submit a PR
+
+The tool system is designed for extensibility. Adding a new Co-Pilot tool is ~30 lines of code. See [CONTRIBUTING.md](CONTRIBUTING.md) for a step-by-step example.
 
 ## Production Deployment (Linux)
 
@@ -115,7 +140,7 @@ For always-on servers (NUC, Raspberry Pi, VPS), run as a systemd service:
 ```bash
 npm run build
 
-sudo tee /etc/systemd/system/aisecretary.service << SERVICE
+sudo tee /etc/systemd/system/aisecretary.service << 'SERVICE'
 [Unit]
 Description=AISecretary
 After=network-online.target
@@ -143,7 +168,7 @@ sudo systemctl start aisecretary
 
 ```bash
 sudo apt install -y caddy
-echo your-hostname.example.com { reverse_proxy localhost:3000 } | sudo tee /etc/caddy/Caddyfile
+echo 'your-hostname.example.com { reverse_proxy localhost:3000 }' | sudo tee /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 ```
 
@@ -180,4 +205,4 @@ This project is documented in a blog series:
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
