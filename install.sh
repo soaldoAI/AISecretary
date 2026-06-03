@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-# Launchdesk Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/soaldoAI/launchdesk/main/install.sh | bash
+# AISecretary Installer
+# Usage: curl -fsSL https://raw.githubusercontent.com/soaldoAI/AISecretary/main/install.sh | bash
 
-REPO="https://github.com/soaldoAI/launchdesk.git"
-INSTALL_DIR="$HOME/launchdesk"
+REPO="https://github.com/soaldoAI/AISecretary.git"
+INSTALL_DIR="$HOME/AISecretary"
 PORT=3001
 
 echo ""
 echo "  ╔══════════════════════════════════════╗"
-echo "  ║         LAUNCHDESK INSTALLER         ║"
+echo "  ║         AISECRETARY INSTALLER         ║"
 echo "  ║  Your self-hosted AI workspace       ║"
 echo "  ╚══════════════════════════════════════╝"
 echo ""
@@ -68,7 +68,7 @@ echo ""
 
 # --- Clone or update ---
 if [ -d "$INSTALL_DIR" ]; then
-  echo "📁 Launchdesk directory already exists at $INSTALL_DIR"
+  echo "📁 AISecretary directory already exists at $INSTALL_DIR"
   read -p "   Update to latest version? [Y/n] " UPDATE
   UPDATE=${UPDATE:-Y}
   if [[ "$UPDATE" =~ ^[Yy]$ ]]; then
@@ -77,7 +77,7 @@ if [ -d "$INSTALL_DIR" ]; then
     echo "✅ Updated to latest version"
   fi
 else
-  echo "📥 Cloning Launchdesk..."
+  echo "📥 Cloning AISecretary..."
   git clone "$REPO" "$INSTALL_DIR"
   echo "✅ Cloned to $INSTALL_DIR"
 fi
@@ -135,14 +135,14 @@ fi
 
 # --- Build ---
 echo ""
-echo "🔨 Building Launchdesk..."
+echo "🔨 Building AISecretary..."
 npm run build 2>&1 | tail -5
 echo "✅ Build complete"
 
 # --- Start ---
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  🚀 Launchdesk is ready!"
+echo "  🚀 AISecretary is ready!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "  Start it now:"
@@ -151,7 +151,7 @@ echo ""
 echo "  Then open: http://localhost:$PORT"
 echo ""
 echo "  Optional next steps:"
-echo "    • Edit ~/.launchdesk/.env.local to add API keys"
+echo "    • Edit ~/AISecretary/.env.local to add API keys"
 echo "    • Set up Google Calendar (see README.md)"
 echo "    • Set up daily Telegram briefs:"
 echo "        chmod +x daily-tasks-notify.sh"
