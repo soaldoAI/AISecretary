@@ -96,6 +96,20 @@ export const copilotTools: ToolDefinition[] = [
   {
     type: "function",
     function: {
+      name: "list_github_issues",
+      description: "List open issues from the configured GitHub repository. Returns issue number, title, labels, and author.",
+      parameters: {
+        type: "object",
+        properties: {
+          label: { type: "string", description: "Filter by label name (optional)" },
+          limit: { type: "number", description: "Max issues to return (default 10, max 30)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "list_agents",
       description: "List all available agents and their roles",
       parameters: { type: "object", properties: {} },
@@ -109,7 +123,7 @@ export interface ToolResult {
   data?: unknown;
 }
 
-export function executeTool(name: string, args: Record<string, unknown>): ToolResult {
+export async function executeTool(name: string, args: Record<string, unknown>): Promise<ToolResult> {
   const db = getDb();
 
   switch (name) {
@@ -216,6 +230,51 @@ export function executeTool(name: string, args: Record<string, unknown>): ToolRe
 
       db.prepare("DELETE FROM tasks WHERE id = ?").run(taskId);
       return { success: true, message: `Deleted task #${taskId}: "${task.title}"` };
+    }
+
+    case "list_github_issues": {
+      const repo = process.env.GITHUB_REPO;
+      if (!repo) return { success: false, message: "GITHUB_REPO not configured. Set it in .env (e.g. owner/repo)." };
+
+      const label = args.label as string | undefined;
+      const limit = Math.min(Math.max((args.limit as number) || 10, 1), 30);
+
+      const params = new URLSearchParams({ state: "open", per_page: String(limit) });
+      if (label) params.set("labels", label);
+
+      const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
+      const token = process.env.GITHUB_TOKEN;
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`https://api.github.com/repos/${repo}/issues?${params}`, { headers });
+      if (!res.ok) {
+        const body = await res.text();
+        return { success: false, message: `GitHub API error (${res.status}): ${body}` };
+      }
+
+      const issues = (await res.json()) as Array<{
+        number: number; title: string; state: string;
+        labels: Array<{ name: string }>; user: { login: string };
+        created_at: string; html_url: string; pull_request?: unknown;
+      }>;
+
+      // Filter out pull requests (GitHub returns PRs in the issues endpoint)
+      const realIssues = issues.filter(i => !i.pull_request);
+
+      const formatted = realIssues.map(i => ({
+        number: i.number,
+        title: i.title,
+        labels: i.labels.map(l => l.name),
+        author: i.user.login,
+        created: i.created_at,
+        url: i.html_url,
+      }));
+
+      return {
+        success: true,
+        message: `Found ${formatted.length} open issue(s) in ${repo}`,
+        data: formatted,
+      };
     }
 
     case "list_agents": {

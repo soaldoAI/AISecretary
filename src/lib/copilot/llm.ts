@@ -100,7 +100,7 @@ export async function* streamChatWithTools(
 
       yield { type: "tool_call", toolName: tc.function.name, toolArgs: args };
 
-      const result = executeTool(tc.function.name, args);
+      const result = await executeTool(tc.function.name, args);
       yield { type: "tool_result", toolName: tc.function.name, toolResult: result };
 
       currentMessages.push({
