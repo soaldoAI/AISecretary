@@ -96,6 +96,44 @@ export const copilotTools: ToolDefinition[] = [
   {
     type: "function",
     function: {
+      name: "search_tasks",
+      description: "Search tasks by keyword. Matches against title and description.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Search keyword" },
+          status: { type: "string", enum: ["backlog", "todo", "in_progress", "review", "done"], description: "Filter by status column (optional)" },
+        },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "task_stats",
+      description: "Get a dashboard summary: task counts by status, by priority, overdue count, and unassigned count.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "bulk_move_tasks",
+      description: "Move all tasks from one status column to another. Example: move all review tasks to done.",
+      parameters: {
+        type: "object",
+        properties: {
+          from_status: { type: "string", enum: ["backlog", "todo", "in_progress", "review", "done"], description: "Source status column" },
+          to_status: { type: "string", enum: ["backlog", "todo", "in_progress", "review", "done"], description: "Target status column" },
+        },
+        required: ["from_status", "to_status"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "list_github_issues",
       description: "List open issues from the configured GitHub repository. Returns issue number, title, labels, and author.",
       parameters: {
@@ -230,6 +268,110 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
 
       db.prepare("DELETE FROM tasks WHERE id = ?").run(taskId);
       return { success: true, message: `Deleted task #${taskId}: "${task.title}"` };
+    }
+
+    case "search_tasks": {
+      const query = args.query as string;
+      const status = args.status as string | undefined;
+
+      let sql = "SELECT id, title, description, status, priority, assigned_to, due_date FROM tasks WHERE (title LIKE ? OR description LIKE ?)";
+      const params: unknown[] = [`%${query}%`, `%${query}%`];
+
+      if (status) {
+        sql += " AND status = ?";
+        params.push(status);
+      }
+
+      sql += " ORDER BY updated_at DESC LIMIT 20";
+
+      const tasks = db.prepare(sql).all(...params) as Array<{
+        id: number; title: string; description: string;
+        status: string; priority: string; assigned_to: number | null; due_date: string | null;
+      }>;
+
+      return {
+        success: true,
+        message: `Found ${tasks.length} task(s) matching "${query}"`,
+        data: tasks,
+      };
+    }
+
+    case "task_stats": {
+      const byStatus = db.prepare(
+        "SELECT status, COUNT(*) as count FROM tasks GROUP BY status"
+      ).all() as Array<{ status: string; count: number }>;
+
+      const byPriority = db.prepare(
+        "SELECT priority, COUNT(*) as count FROM tasks GROUP BY priority"
+      ).all() as Array<{ priority: string; count: number }>;
+
+      const overdue = db.prepare(
+        "SELECT COUNT(*) as count FROM tasks WHERE due_date < date('now') AND status != 'done'"
+      ).get() as { count: number };
+
+      const unassigned = db.prepare(
+        "SELECT COUNT(*) as count FROM tasks WHERE assigned_to IS NULL AND status != 'done'"
+      ).get() as { count: number };
+
+      const total = db.prepare(
+        "SELECT COUNT(*) as count FROM tasks"
+      ).get() as { count: number };
+
+      const statusMap: Record<string, number> = {};
+      for (const row of byStatus) statusMap[row.status] = row.count;
+
+      const priorityMap: Record<string, number> = {};
+      for (const row of byPriority) priorityMap[row.priority] = row.count;
+
+      return {
+        success: true,
+        message: `Board summary: ${total.count} total tasks, ${overdue.count} overdue, ${unassigned.count} unassigned`,
+        data: {
+          total: total.count,
+          by_status: statusMap,
+          by_priority: priorityMap,
+          overdue: overdue.count,
+          unassigned: unassigned.count,
+        },
+      };
+    }
+
+    case "bulk_move_tasks": {
+      const fromStatus = args.from_status as string;
+      const toStatus = args.to_status as string;
+
+      if (fromStatus === toStatus) return { success: false, message: "Source and target columns are the same" };
+
+      const tasks = db.prepare(
+        "SELECT id, title FROM tasks WHERE status = ?"
+      ).all(fromStatus) as Array<{ id: number; title: string }>;
+
+      if (tasks.length === 0) return { success: false, message: `No tasks in ${fromStatus}` };
+
+      const maxPos = db.prepare(
+        "SELECT COALESCE(MAX(position), 0) as pos FROM tasks WHERE status = ?"
+      ).get(toStatus) as { pos: number };
+
+      const update = db.prepare(
+        "UPDATE tasks SET status = ?, position = ?, updated_at = datetime('now') WHERE id = ?"
+      );
+
+      const moveAll = db.transaction(() => {
+        let pos = maxPos.pos;
+        for (const task of tasks) {
+          pos++;
+          update.run(toStatus, pos, task.id);
+          logActivity(task.id, "Co-Pilot", "moved", `${fromStatus} → ${toStatus} (bulk)`);
+        }
+      });
+
+      moveAll();
+
+      return {
+        success: true,
+        message: `Moved ${tasks.length} task(s) from ${fromStatus} → ${toStatus}`,
+        data: { count: tasks.length, task_ids: tasks.map(t => t.id) },
+      };
     }
 
     case "list_github_issues": {
