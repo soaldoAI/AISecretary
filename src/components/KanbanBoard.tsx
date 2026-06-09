@@ -61,7 +61,7 @@ export default function KanbanBoard({ tasks, columns, activeColumn, onMoveTask, 
 
           if (columnTasks.length === 0) {
             return (
-              <div className="flex flex-col items-center justify-center py-20 text-gray-600">
+              <div className="flex flex-col items-center justify-center py-20 text-subtle">
                 <div className="text-4xl mb-3">
                   {activeColumn === "done" ? "🎉" : "📋"}
                 </div>
@@ -99,25 +99,25 @@ export default function KanbanBoard({ tasks, columns, activeColumn, onMoveTask, 
           return (
             <div
               key={col.id}
-              className={`flex-shrink-0 w-72 flex flex-col bg-gray-900/50 rounded-xl border-t-2 ${STATUS_COLORS[col.id]}`}
+              className={`flex-shrink-0 w-72 flex flex-col bg-surface rounded-xl border-t-2 ${STATUS_COLORS[col.id]}`}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.id)}
             >
               <div className="px-4 py-3 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${STATUS_BG[col.id]}`} />
-                  <h2 className="font-semibold text-sm text-gray-300 uppercase tracking-wide">
+                  <h2 className="font-semibold text-sm text-muted uppercase tracking-wide">
                     {col.label}
                   </h2>
                 </div>
-                <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-surface-muted text-muted px-2 py-0.5 rounded-full">
                   {columnTasks.length}
                 </span>
               </div>
 
               <div className="px-3 pb-3 space-y-2 flex-1 overflow-y-auto hide-scrollbar">
                 {columnTasks.length === 0 ? (
-                  <div className="flex items-center justify-center py-10 text-gray-700 text-xs">
+                  <div className="flex items-center justify-center py-10 text-subtle text-xs">
                     Drop tasks here
                   </div>
                 ) : (
