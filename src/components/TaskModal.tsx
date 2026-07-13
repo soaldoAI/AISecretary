@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Task, Agent, COLUMNS, TaskStatus, Priority } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { Agent, COLUMNS, Priority, Task, TaskStatus } from "@/lib/types";
 
 interface Activity {
   id: number;
@@ -35,12 +35,12 @@ const PRIORITIES: { value: Priority; label: string; color: string }[] = [
 ];
 
 const ACTOR_STYLES: Record<string, string> = {
-  "Sohan": "bg-blue-900/50 text-blue-300 border-blue-800",
+  Sohan: "bg-blue-900/50 text-blue-300 border-blue-800",
   "Co-Pilot": "bg-purple-900/50 text-purple-300 border-purple-800",
 };
 
 const ACTOR_ICONS: Record<string, string> = {
-  "Sohan": "👔",
+  Sohan: "👔",
   "Co-Pilot": "✨",
 };
 
@@ -64,14 +64,14 @@ export default function TaskModal({ task, agents, activeColumn, onSave, onDelete
   const [activity, setActivity] = useState<Activity[]>([]);
 
   useEffect(() => {
-    if (task?.id) {
-      fetch(`/api/tasks/${task.id}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.activity) setActivity(data.activity);
-        })
-        .catch(() => {});
-    }
+    if (!task?.id) return;
+
+    fetch(`/api/tasks/${task.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.activity) setActivity(data.activity);
+      })
+      .catch(() => {});
   }, [task?.id]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,60 +102,63 @@ export default function TaskModal({ task, agents, activeColumn, onSave, onDelete
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center z-50"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 bg-overlay backdrop-blur-sm flex items-end sm:items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-gray-900 w-full sm:max-w-xl sm:rounded-xl rounded-t-2xl border-t sm:border border-gray-800 max-h-[90dvh] overflow-y-auto safe-bottom"
+        className="bg-surface-strong w-full sm:max-w-xl sm:rounded-xl rounded-t-2xl border-t sm:border border-theme max-h-[90dvh] overflow-y-auto safe-bottom shadow-theme"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-gray-700" />
+          <div className="w-10 h-1 rounded-full bg-surface-muted" />
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Header */}
           <div className="px-5 py-3 sm:py-4 flex items-center justify-between">
-            <h2 className="text-base sm:text-lg font-semibold">
-              {task ? `Task #${task.id}` : "New Task"}
-            </h2>
-            <button
-              type="button" onClick={onClose}
-              className="text-gray-500 hover:text-white p-1 transition-colors"
-            >
+            <h2 className="text-base sm:text-lg font-semibold text-app">{task ? `Task #${task.id}` : "New Task"}</h2>
+            <button type="button" onClick={onClose} className="text-muted hover:text-app p-1 transition-colors">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </button>
           </div>
 
-          {/* Tabs (only show if editing existing task) */}
           {task && (
-            <div className="px-5 border-b border-gray-800/60">
+            <div className="px-5 border-b border-theme-soft">
               <div className="flex gap-4">
-                <button type="button" onClick={() => setTab("details")}
-                  className={"py-2 text-sm font-medium border-b-2 transition-colors " +
-                    (tab === "details" ? "border-blue-500 text-white" : "border-transparent text-gray-500 hover:text-gray-300")}>
+                <button
+                  type="button"
+                  onClick={() => setTab("details")}
+                  className={
+                    "py-2 text-sm font-medium border-b-2 transition-colors " +
+                    (tab === "details"
+                      ? "border-blue-500 text-app"
+                      : "border-transparent text-muted hover:text-app")
+                  }
+                >
                   Details
                 </button>
-                <button type="button" onClick={() => setTab("activity")}
-                  className={"py-2 text-sm font-medium border-b-2 transition-colors " +
-                    (tab === "activity" ? "border-blue-500 text-white" : "border-transparent text-gray-500 hover:text-gray-300")}>
+                <button
+                  type="button"
+                  onClick={() => setTab("activity")}
+                  className={
+                    "py-2 text-sm font-medium border-b-2 transition-colors " +
+                    (tab === "activity"
+                      ? "border-blue-500 text-app"
+                      : "border-transparent text-muted hover:text-app")
+                  }
+                >
                   Activity ({activity.length})
                 </button>
               </div>
             </div>
           )}
 
-          {/* Details tab */}
           {tab === "details" && (
             <div className="px-5 pb-4 pt-4 space-y-4">
               <input
-                type="text" value={title}
+                type="text"
+                value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-transparent text-lg sm:text-base font-medium text-white placeholder-gray-600 focus:outline-none border-b border-gray-800 pb-3"
+                className="w-full bg-transparent text-lg sm:text-base font-medium text-app placeholder:text-subtle focus:outline-none border-b border-theme pb-3"
                 placeholder="Task title..."
                 autoFocus
               />
@@ -164,21 +167,24 @@ export default function TaskModal({ task, agents, activeColumn, onSave, onDelete
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-none"
+                className="w-full bg-input border border-input rounded-lg px-3 py-2.5 text-sm text-app placeholder:text-subtle focus:outline-none focus:ring-1 ring-accent resize-none"
                 placeholder="Add description..."
               />
 
               <div>
-                <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wider">Priority</label>
+                <label className="block text-xs text-subtle mb-2 uppercase tracking-wider">Priority</label>
                 <div className="flex gap-2">
                   {PRIORITIES.map((p) => (
                     <button
-                      key={p.value} type="button"
+                      key={p.value}
+                      type="button"
                       onClick={() => setPriority(p.value)}
-                      className={"flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all " +
+                      className={
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all " +
                         (priority === p.value
-                          ? "bg-gray-700 text-white ring-1 ring-gray-600"
-                          : "bg-gray-800/60 text-gray-500 hover:text-gray-300")}
+                          ? "bg-surface-muted text-app ring-1 ring-border"
+                          : "bg-surface-soft text-muted hover:text-app")
+                      }
                     >
                       <span className={"w-1.5 h-1.5 rounded-full " + p.color} />
                       {p.label}
@@ -189,64 +195,76 @@ export default function TaskModal({ task, agents, activeColumn, onSave, onDelete
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider">Status</label>
-                  <select value={status}
+                  <label className="block text-xs text-subtle mb-1.5 uppercase tracking-wider">Status</label>
+                  <select
+                    value={status}
                     onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                    className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 appearance-none">
+                    className="w-full bg-input border border-input rounded-lg px-3 py-2.5 text-sm text-app focus:outline-none focus:ring-1 ring-accent appearance-none"
+                  >
                     {COLUMNS.map((col) => (
-                      <option key={col.id} value={col.id}>{col.label}</option>
+                      <option key={col.id} value={col.id}>
+                        {col.label}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider">Assign To</label>
-                  <select value={assignedTo || ""}
+                  <label className="block text-xs text-subtle mb-1.5 uppercase tracking-wider">Assign To</label>
+                  <select
+                    value={assignedTo || ""}
                     onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : null)}
-                    className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 appearance-none">
+                    className="w-full bg-input border border-input rounded-lg px-3 py-2.5 text-sm text-app focus:outline-none focus:ring-1 ring-accent appearance-none"
+                  >
                     <option value="">Unassigned</option>
                     {agents.map((a) => (
-                      <option key={a.id} value={a.id}>{a.avatar} {a.name} ({a.role})</option>
+                      <option key={a.id} value={a.id}>
+                        {a.avatar} {a.name} ({a.role})
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider">Due Date</label>
-                <input type="date" value={dueDate}
+                <label className="block text-xs text-subtle mb-1.5 uppercase tracking-wider">Due Date</label>
+                <input
+                  type="date"
+                  value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50" />
+                  className="w-full bg-input border border-input rounded-lg px-3 py-2.5 text-sm text-app focus:outline-none focus:ring-1 ring-accent"
+                />
               </div>
             </div>
           )}
 
-          {/* Activity tab */}
           {tab === "activity" && (
             <div className="px-5 pb-4 pt-4">
               {activity.length === 0 ? (
-                <p className="text-gray-600 text-sm text-center py-8">No activity yet</p>
+                <p className="text-subtle text-sm text-center py-8">No activity yet</p>
               ) : (
                 <div className="space-y-3">
                   {activity.map((a) => (
                     <div key={a.id} className="flex gap-3">
-                      {/* Actor icon */}
                       <div className="shrink-0 mt-0.5">
                         <span className="text-sm">{ACTOR_ICONS[a.actor] || "👤"}</span>
                       </div>
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={"text-[10px] px-1.5 py-0.5 rounded border font-medium " +
-                            (ACTOR_STYLES[a.actor] || "bg-gray-800 text-gray-400 border-gray-700")}>
+                          <span
+                            className={
+                              "text-[10px] px-1.5 py-0.5 rounded border font-medium " +
+                              (ACTOR_STYLES[a.actor] || "bg-surface-muted text-muted border-theme")
+                            }
+                          >
                             {a.actor}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-subtle">
                             {ACTION_ICONS[a.action] || ""} {a.action}
                           </span>
-                          <span className="text-[10px] text-gray-600">{formatRelative(a.created_at)}</span>
+                          <span className="text-[10px] text-subtle">{formatRelative(a.created_at)}</span>
                         </div>
                         {a.detail && (
-                          <p className="text-xs text-gray-400 mt-1 whitespace-pre-wrap leading-relaxed">{a.detail}</p>
+                          <p className="text-xs text-muted mt-1 whitespace-pre-wrap leading-relaxed">{a.detail}</p>
                         )}
                       </div>
                     </div>
@@ -256,25 +274,21 @@ export default function TaskModal({ task, agents, activeColumn, onSave, onDelete
             </div>
           )}
 
-          {/* Actions */}
-          <div className="px-5 py-4 border-t border-gray-800/60 flex items-center justify-between">
+          <div className="px-5 py-4 border-t border-theme-soft flex items-center justify-between">
             <div>
               {onDelete && !confirmDelete && (
-                <button type="button" onClick={() => setConfirmDelete(true)}
-                  className="text-gray-500 hover:text-red-400 text-xs transition-colors">
+                <button type="button" onClick={() => setConfirmDelete(true)} className="text-muted hover:text-red-400 text-xs transition-colors">
                   Delete
                 </button>
               )}
               {onDelete && confirmDelete && (
-                <button type="button" onClick={onDelete}
-                  className="text-red-400 text-xs font-medium animate-pulse">
+                <button type="button" onClick={onDelete} className="text-red-400 text-xs font-medium animate-pulse">
                   Tap to confirm delete
                 </button>
               )}
             </div>
             {tab === "details" && (
-              <button type="submit"
-                className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors">
+              <button type="submit" className="bg-accent hover:bg-blue-500 active:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors">
                 {task ? "Save" : "Create"}
               </button>
             )}

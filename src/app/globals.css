@@ -1,8 +1,78 @@
 @import "tailwindcss";
 
 :root {
+  --font-geist-sans: "Arial", "Helvetica", sans-serif;
+  --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  color-scheme: dark;
   --background: #030712;
   --foreground: #f9fafb;
+  --surface: rgba(17, 24, 39, 0.92);
+  --surface-strong: #111827;
+  --surface-muted: #1f2937;
+  --surface-soft: #0f172a;
+  --border: rgba(55, 65, 81, 0.85);
+  --border-soft: rgba(75, 85, 99, 0.55);
+  --input-bg: rgba(17, 24, 39, 0.65);
+  --input-border: rgba(55, 65, 81, 0.85);
+  --muted: #9ca3af;
+  --subtle: #6b7280;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.16);
+  --accent-foreground: #eff6ff;
+  --overlay: rgba(3, 7, 18, 0.7);
+  --shadow: 15 23 42;
+}
+
+html.light {
+  color-scheme: light;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: #ffffff;
+  --surface-muted: #f1f5f9;
+  --surface-soft: #e2e8f0;
+  --border: rgba(203, 213, 225, 0.95);
+  --border-soft: rgba(226, 232, 240, 0.95);
+  --input-bg: rgba(248, 250, 252, 0.95);
+  --input-border: rgba(203, 213, 225, 0.95);
+  --muted: #475569;
+  --subtle: #64748b;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-foreground: #eff6ff;
+  --overlay: rgba(15, 23, 42, 0.45);
+}
+
+html.light [class*="bg-gray-950"] {
+  background-color: var(--background) !important;
+}
+
+html.light [class*="bg-gray-900"] {
+  background-color: var(--surface-strong) !important;
+}
+
+html.light [class*="bg-gray-800"] {
+  background-color: var(--surface-muted) !important;
+}
+
+html.light [class*="bg-gray-700"] {
+  background-color: var(--surface-soft) !important;
+}
+
+html.light [class*="bg-gray-600"] {
+  background-color: color-mix(in srgb, var(--surface-soft) 70%, var(--accent) 30%) !important;
+}
+
+html.light [class*="border-gray-800"] {
+  border-color: var(--border) !important;
+}
+
+html.light [class*="border-gray-700"] {
+  border-color: var(--border-soft) !important;
+}
+
+html.light [class*="border-gray-600"] {
+  border-color: color-mix(in srgb, var(--border-soft) 70%, var(--accent) 30%) !important;
 }
 
 @theme inline {
@@ -13,7 +83,9 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(37, 99, 235, 0.12), transparent 34%),
+    var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-tap-highlight-color: transparent;
@@ -31,7 +103,85 @@ body {
 
 /* Safe area padding for PWA */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .safe-bottom {
+.safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer utilities {
+  .bg-app {
+    background-color: var(--background);
+  }
+
+  .bg-surface {
+    background-color: var(--surface);
+  }
+
+  .bg-surface-strong {
+    background-color: var(--surface-strong);
+  }
+
+  .bg-surface-muted {
+    background-color: var(--surface-muted);
+  }
+
+  .bg-surface-soft {
+    background-color: var(--surface-soft);
+  }
+
+  .bg-input {
+    background-color: var(--input-bg);
+  }
+
+  .bg-overlay {
+    background-color: var(--overlay);
+  }
+
+  .bg-accent {
+    background-color: var(--accent);
+  }
+
+  .bg-accent-soft {
+    background-color: var(--accent-soft);
+  }
+
+  .text-app {
+    color: var(--foreground);
+  }
+
+  .text-muted {
+    color: var(--muted);
+  }
+
+  .text-subtle {
+    color: var(--subtle);
+  }
+
+  .text-accent {
+    color: var(--accent);
+  }
+
+  .text-accent-foreground {
+    color: var(--accent-foreground);
+  }
+
+  .border-theme {
+    border-color: var(--border);
+  }
+
+  .border-theme-soft {
+    border-color: var(--border-soft);
+  }
+
+  .border-input {
+    border-color: var(--input-border);
+  }
+
+  .ring-accent {
+    --tw-ring-color: var(--accent);
+  }
+
+  .shadow-theme {
+    box-shadow: 0 24px 48px rgb(var(--shadow) / 0.24);
   }
 }

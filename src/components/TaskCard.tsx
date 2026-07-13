@@ -83,12 +83,12 @@ export default function TaskCard({ task, onDragStart, onClick, onQuickMove }: Pr
             {showMoveMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setShowMoveMenu(false); }} />
-                <div className="absolute right-0 bottom-8 z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 min-w-[140px]">
+                <div className="absolute right-0 bottom-8 z-50 bg-surface-strong border border-theme rounded-lg shadow-xl py-1 min-w-[140px]">
                   {COLUMNS.filter(c => c.id !== task.status).map((col) => (
                     <button
                       key={col.id}
                       onClick={(e) => { e.stopPropagation(); onQuickMove(col.id); setShowMoveMenu(false); }}
-                      className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-gray-700/60 transition-colors"
+                      className="w-full text-left px-3 py-2 text-xs text-muted hover:bg-surface-muted transition-colors"
                     >
                       Move to {col.label}
                     </button>

@@ -90,18 +90,18 @@ export default function Home() {
   return (
     <>
       {/* Header */}
-      <header className="shrink-0 border-b border-gray-800/60 px-4 py-3 sm:px-6 sm:py-4">
+      <header className="shrink-0 border-b border-theme-soft px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight">Board</h1>
-            <p className="text-[11px] sm:text-sm text-gray-500">Agent-Driven Tasks</p>
+            <p className="text-[11px] sm:text-sm text-muted">Agent-Driven Tasks</p>
           </div>
           <button
             onClick={() => {
               setEditingTask(null);
               setModalOpen(true);
             }}
-            className="hidden sm:block bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+            className="hidden sm:block bg-accent hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
           >
             + New Task
           </button>
@@ -109,24 +109,24 @@ export default function Home() {
       </header>
 
       {/* Column Tabs (mobile) */}
-      <nav className="shrink-0 border-b border-gray-800/40 sm:hidden">
+      <nav className="shrink-0 border-b border-theme-soft sm:hidden">
         <div className="flex hide-scrollbar overflow-x-auto">
           {COLUMNS.map((col) => (
             <button
               key={col.id}
               onClick={() => setActiveColumn(col.id)}
               className={"flex-1 min-w-0 px-1 py-2.5 text-center text-xs font-medium transition-colors relative " +
-                (activeColumn === col.id ? "text-white" : "text-gray-500")}
+                (activeColumn === col.id ? "text-app" : "text-muted")}
             >
               <span className="block truncate">{col.label}</span>
               {taskCounts[col.id] > 0 && (
                 <span className={"inline-block mt-0.5 text-[10px] min-w-[18px] px-1 py-px rounded-full " +
-                  (activeColumn === col.id ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400")}>
+                  (activeColumn === col.id ? "bg-accent text-white" : "bg-surface-muted text-muted")}>
                   {taskCounts[col.id]}
                 </span>
               )}
               {activeColumn === col.id && (
-                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-blue-500 rounded-full" />
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-accent rounded-full" />
               )}
             </button>
           ))}
@@ -153,7 +153,7 @@ export default function Home() {
           setEditingTask(null);
           setModalOpen(true);
         }}
-        className="sm:hidden fixed bottom-20 right-4 w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center text-2xl font-light transition-transform active:scale-95 z-40"
+        className="sm:hidden fixed bottom-20 right-4 w-14 h-14 bg-accent hover:bg-blue-500 rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center text-2xl font-light transition-transform active:scale-95 z-40"
       >
         +
       </button>
