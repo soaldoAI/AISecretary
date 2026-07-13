@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import getDb from "@/lib/db";
+import { loadAgents } from "@/lib/agent-loader";
 
 export async function GET() {
-  const db = getDb();
-  const agents = db.prepare("SELECT * FROM agents ORDER BY id ASC").all();
+  const agents = loadAgents();
   return NextResponse.json(agents);
 }
