@@ -1,0 +1,17 @@
+services:
+  aisecretary:
+    build: .
+    container_name: aisecretary
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      NODE_ENV: production
+      DB_PATH: /app/data/kanban.db
+
+    volumes:
+      - ./data:/app/data
+      - ./.env.local:/app/.env.local
+
+    restart: unless-stopped
